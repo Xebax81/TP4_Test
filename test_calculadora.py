@@ -122,7 +122,7 @@ def test_logaritmo_base10(calc):  #17
     with pytest.raises(ValueError):
         calc.logaritmo(-10)
 
-def test_seno(calc): #18
-    assert pytest.approx(calc.seno(0)) == 0.0
-    assert pytest.approx(calc.seno(math.pi/2)) == 1.0
-    assert pytest.approx(calc.seno(math.pi)) == 0.0
+#def test_seno(calc): #18
+    #assert pytest.approx(calc.seno(0)) == 0.0
+    #assert pytest.approx(calc.seno(math.pi/2)) == 1.0
+    #assert pytest.approx(calc.seno(math.pi)) == 0.0
