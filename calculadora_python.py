@@ -38,6 +38,22 @@ class Calculadora:
         for i in range(2, n + 1):
             resultado *= i
         return resultado
+    
+    def modulo(self, a, b):
+        """Devuelve el módulo de a % b"""
+        if b == 0:
+            raise ValueError("No se puede dividir por cero")
+        return a % b
+
+    def promedio(self, numeros):
+        """Calcula el promedio de una lista de números"""
+        if not numeros:
+            raise ValueError("La lista no puede estar vacía")
+        return sum(numeros) / len(numeros)
+
+    def es_par(self, n):
+        """Devuelve True si el número es par, False si es impar"""
+        return n % 2 == 0
 
 def main():
     """Función principal para demostrar el uso de la calculadora"""

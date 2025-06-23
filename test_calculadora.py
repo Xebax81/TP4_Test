@@ -57,3 +57,24 @@ def test_factorial_numero_negativo(calc):
         calc.factorial(-1)
     with pytest.raises(ValueError):
         calc.factorial(-10)
+
+        
+def test_modulo(calc):
+    assert calc.modulo(10, 3) == 1
+    assert calc.modulo(9, 3) == 0
+    assert calc.modulo(-10, 3) == -10 % 3
+    with pytest.raises(ValueError):
+        calc.modulo(5, 0)
+
+def test_promedio(calc):
+    assert calc.promedio([1, 2, 3, 4, 5]) == 3
+    assert calc.promedio([10]) == 10
+    assert pytest.approx(calc.promedio([2.5, 3.5])) == 3.0
+    with pytest.raises(ValueError):
+        calc.promedio([])
+
+def test_es_par(calc):
+    assert calc.es_par(2) is True
+    assert calc.es_par(3) is False
+    assert calc.es_par(0) is True
+    assert calc.es_par(-4) is True
