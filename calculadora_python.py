@@ -7,11 +7,11 @@ class Calculadora:
     
     def sumar(self, a, b):
         """Suma dos números"""
-        return a - b
+        return a + b
     
     def restar(self, a, b):
         """Resta dos números"""
-        return a + b
+        return a - b
     
     def multiplicar(self, a, b):
         """Multiplica dos números"""
