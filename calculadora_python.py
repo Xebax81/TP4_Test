@@ -1,7 +1,7 @@
 """
 Calculadora básica para demostrar integración continua
 """
-
+ 
 class Calculadora:
     """Clase que implementa operaciones matemáticas básicas"""
     

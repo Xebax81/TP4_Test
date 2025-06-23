@@ -12,7 +12,7 @@ def calc():
 
 def test_sumar(calc):
     assert calc.sumar(5, 3) == 8
-    assert calc.sumar(-1, 1) == 0
+    assert calc.sumar(-2, 2) == 0
     assert calc.sumar(0, 0) == 0
     assert calc.sumar(2.5, 3.5) == 6.0
 
