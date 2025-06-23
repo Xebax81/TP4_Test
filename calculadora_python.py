@@ -1,5 +1,5 @@
 """
-Calculadora básica para demostrar integración continua
+Calculadora básica para demostrar integración continua.
 """
 import math
 class Calculadora:
