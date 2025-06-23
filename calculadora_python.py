@@ -90,9 +90,9 @@ class Calculadora:
             raise ValueError("El logaritmo solo está definido para números positivos")
          return math.log10(x)
 
-    #def seno(self, x):
-       #"""Devuelve el seno del ángulo x en radianes"""
-       #return math.sin(x)
+    def seno(self, x):
+       """Devuelve el seno del ángulo x en radianes"""
+       return math.sin(x)
     
 def main():
     """Función principal para demostrar el uso de la calculadora"""
