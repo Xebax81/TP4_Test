@@ -1,7 +1,7 @@
 """
 Calculadora básica para demostrar integración continua
 """
- 
+import math
 class Calculadora:
     """Clase que implementa operaciones matemáticas básicas"""
     
@@ -55,6 +55,23 @@ class Calculadora:
         """Devuelve True si el número es par, False si es impar"""
         return n % 2 == 0
 
+    def raiz_cuadrada(self, x):
+        """Devuelve la raíz cuadrada de x"""
+        if x < 0:
+            raise ValueError("No se puede calcular la raíz cuadrada de un número negativo")
+        return math.sqrt(x)
+
+    def valor_absoluto(self, x):
+        """Devuelve el valor absoluto de x"""
+        return abs(x)
+
+    def redondear(self, numero, decimales):
+        """Redondea un número a una cantidad específica de decimales"""
+        try:
+            return round(float(numero), int(decimales))
+        except (ValueError, TypeError):
+            raise ValueError("Los parámetros deben ser numéricos")
+    
 def main():
     """Función principal para demostrar el uso de la calculadora"""
     calc = Calculadora()

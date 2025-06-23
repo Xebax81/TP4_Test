@@ -78,3 +78,22 @@ def test_es_par(calc):
     assert calc.es_par(3) is False
     assert calc.es_par(0) is True
     assert calc.es_par(-4) is True
+
+def test_raiz_cuadrada(calc):
+    assert calc.raiz_cuadrada(4) == 2
+    assert calc.raiz_cuadrada(0) == 0
+    assert pytest.approx(calc.raiz_cuadrada(2)) == 1.414213562
+    with pytest.raises(ValueError):
+        calc.raiz_cuadrada(-9)
+
+def test_valor_absoluto(calc):
+    assert calc.valor_absoluto(5) == 5
+    assert calc.valor_absoluto(-5) == 5
+    assert calc.valor_absoluto(0) == 0
+
+def test_redondear(calc):
+    assert calc.redondear(3.14159, 2) == 3.14
+    assert calc.redondear(3.1459, 3) == 3.146
+    assert calc.redondear(2.5, 0) == 2.0
+    with pytest.raises(ValueError):
+        calc.redondear("abc", 2)
