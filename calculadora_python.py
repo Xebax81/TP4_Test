@@ -72,6 +72,25 @@ class Calculadora:
         except (ValueError, TypeError):
             raise ValueError("Los parámetros deben ser numéricos")
     
+    def maximo(self, lista):
+        """Devuelve el valor máximo de una lista"""
+        if not lista:
+            raise ValueError("La lista no puede estar vacía")
+        return max(lista)
+
+    def minimo(self, lista):
+        """Devuelve el valor mínimo de una lista"""
+        if not lista:
+             raise ValueError("La lista no puede estar vacía")
+        return min(lista)
+
+    def logaritmo(self, x):
+         """Devuelve el logaritmo en base 10 de un número positivo"""
+         if x <= 0:
+            raise ValueError("El logaritmo solo está definido para números positivos")
+         return math.log10(x)
+
+    
 def main():
     """Función principal para demostrar el uso de la calculadora"""
     calc = Calculadora()
