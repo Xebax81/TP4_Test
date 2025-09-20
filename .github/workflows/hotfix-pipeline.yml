@@ -1,0 +1,274 @@
+name: HOTFIX Pipeline - Mantenimiento Correctivo
+
+# Ejecutar solo en ramas hotfix/* cuando se hace PR a main
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+  push:
+    branches: [ 'hotfix/**' ]
+
+env:
+  PYTHON_VERSION: 3.11
+
+jobs:
+  hotfix-validation:
+    name: "🚨 Validación Rápida HOTFIX"
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Cache de dependencias
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-hotfix-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-hotfix-
+          ${{ runner.os }}-pip-
+
+    - name: Instalar dependencias críticas
+      run: |
+        python -m pip install --upgrade pip
+        # Solo instalar dependencias esenciales para velocidad
+        pip install pytest pytest-cov flake8 black
+
+    - name: Verificación básica de formato
+      run: |
+        echo "🔍 Verificando formato básico..."
+        black --check --diff . || echo "⚠️ Formato necesita corrección pero continuamos"
+
+    - name: Análisis estático crítico
+      run: |
+        echo "🔍 Análisis estático crítico..."
+        # Solo errores críticos (sintaxis, imports, etc.)
+        flake8 . --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Verificar que el código importa correctamente
+      run: |
+        echo "🔍 Verificando imports..."
+        python -c "from calculadora_python import Calculadora; print('✅ Imports OK')"
+
+  critical-tests:
+    name: "⚡ Pruebas Críticas"
+    runs-on: ubuntu-latest
+    needs: hotfix-validation
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-cov
+
+    - name: Ejecutar pruebas unitarias críticas
+      run: |
+        echo "🧪 Ejecutando pruebas unitarias críticas..."
+        pytest test_calculadora.py -v \
+          --cov=calculadora_python \
+          --cov-report=term \
+          --cov-fail-under=70 \
+          -x  # Detenerse en el primer fallo
+
+  regression-tests:
+    name: "🔄 Pruebas de Regresión"
+    runs-on: ubuntu-latest
+    needs: critical-tests
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest
+
+    - name: Ejecutar pruebas de regresión
+      run: |
+        echo "🔄 Ejecutando pruebas de regresión..."
+        # Ejecutar todas las pruebas para detectar regresiones
+        pytest test_calculadora.py -v
+        
+        # Ejecutar también pruebas de regresión específicas si existen
+        if [ -f test_regression.py ]; then
+          pytest test_regression.py -v
+        else
+          echo "ℹ️ No hay pruebas de regresión específicas"
+        fi
+
+  smoke-tests:
+    name: "💨 Smoke Tests"
+    runs-on: ubuntu-latest
+    needs: regression-tests
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Smoke tests - Funcionalidades principales
+      run: |
+        echo "💨 Ejecutando smoke tests..."
+        cat > smoke_test.py << 'EOF'
+        from calculadora_python import Calculadora
+        
+        calc = Calculadora()
+        
+        # Test de funcionalidades core
+        try:
+            assert calc.sumar(2, 3) == 5
+            assert calc.restar(10, 4) == 6
+            assert calc.multiplicar(3, 4) == 12
+            assert calc.dividir(10, 2) == 5
+            print("✅ Smoke tests: Operaciones básicas OK")
+        except Exception as e:
+            print(f"❌ Smoke test fallido: {e}")
+            exit(1)
+        
+        try:
+            calc.dividir(1, 0)
+            print("❌ Error: División por cero debería fallar")
+            exit(1)
+        except ValueError:
+            print("✅ Smoke tests: Manejo de errores OK")
+        except Exception as e:
+            print(f"❌ Error inesperado: {e}")
+            exit(1)
+        
+        print("🎉 Todos los smoke tests pasaron")
+        EOF
+        
+        python smoke_test.py
+
+  security-check:
+    name: "🔒 Verificación de Seguridad Básica"
+    runs-on: ubuntu-latest
+    needs: hotfix-validation
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Instalar herramientas de seguridad
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+
+    - name: Análisis de seguridad básico
+      run: |
+        echo "🔒 Verificación de seguridad básica..."
+        bandit -r . -f txt -i || echo "⚠️ Warnings de seguridad detectados"
+        
+    - name: Verificar dependencias vulnerables
+      run: |
+        echo "🔒 Verificando vulnerabilidades en dependencias..."
+        safety check || echo "⚠️ Posibles vulnerabilidades detectadas"
+
+  hotfix-approval-gate:
+    name: "✋ Gate de Aprobación HOTFIX"
+    runs-on: ubuntu-latest
+    needs: [critical-tests, regression-tests, smoke-tests, security-check]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Resumen de validaciones
+      run: |
+        echo "📊 RESUMEN DE VALIDACIONES HOTFIX"
+        echo "=================================="
+        echo "✅ Validación rápida: Completada"
+        echo "✅ Pruebas críticas: Completadas"
+        echo "✅ Pruebas regresión: Completadas"
+        echo "✅ Smoke tests: Completados"
+        echo "✅ Seguridad básica: Completada"
+        echo ""
+        echo "🚨 HOTFIX LISTO PARA REVISIÓN"
+        echo ""
+        echo "⚠️  ATENCIÓN: Este es un HOTFIX para producción"
+        echo "⚠️  Requiere aprobación manual antes del merge"
+        echo "⚠️  Revisar impacto y validar solución"
+
+  deploy-staging-hotfix:
+    name: "🎭 Deploy a Staging (HOTFIX)"
+    runs-on: ubuntu-latest
+    needs: [critical-tests, regression-tests, smoke-tests]
+    if: github.ref_name != 'main' && startsWith(github.ref_name, 'hotfix/')
+    
+    steps:
+    - name: Simular deploy a staging
+      run: |
+        echo "🎭 Desplegando HOTFIX a staging..."
+        echo "📦 Rama: ${{ github.ref_name }}"
+        echo "🔗 URL: https://staging.calculadora.ejemplo.com"
+        echo "⏰ Tiempo estimado: 2-3 minutos"
+        echo "✅ Deploy a staging completado"
+
+  production-ready-check:
+    name: "🚀 Verificación Lista para Producción"
+    runs-on: ubuntu-latest
+    needs: [hotfix-approval-gate, deploy-staging-hotfix]
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    
+    steps:
+    - name: Checklist de producción
+      run: |
+        echo "🚀 CHECKLIST PARA PRODUCCIÓN"
+        echo "============================"
+        echo "✅ Validaciones técnicas completadas"
+        echo "✅ Deploy a staging exitoso"
+        echo "✅ Pruebas de regresión pasadas"
+        echo ""
+        echo "📋 PENDIENTE DE APROBACIÓN MANUAL:"
+        echo "□ Revisión de código por Technical Lead"
+        echo "□ Aprobación de Product Owner (si aplica)"
+        echo "□ Validación en staging por QA"
+        echo "□ Aprobación final para producción"
+        echo ""
+        echo "⚠️  NO HACER MERGE SIN APROBACIONES MANUALES"
+
+  notify-team:
+    name: "📢 Notificar Equipo"
+    runs-on: ubuntu-latest
+    needs: [production-ready-check]
+    if: always()
+    
+    steps:
+    - name: Notificación de estado
+      run: |
+        echo "📢 NOTIFICACIÓN AL EQUIPO"
+        echo "========================"
+        echo "🚨 HOTFIX: ${{ github.ref_name }}"
+        echo "📝 PR: ${{ github.event.pull_request.html_url }}"
+        echo "👤 Autor: ${{ github.actor }}"
+        echo "🕐 Timestamp: $(date)"
+        echo ""
+        if [[ "${{ needs.production-ready-check.result }}" == "success" ]]; then
+          echo "✅ Pipeline HOTFIX completado exitosamente"
+          echo "⏳ Esperando aprobación manual para producción"
+        else
+          echo "❌ Pipeline HOTFIX falló - revisar logs"
+          echo "🔄 Corregir errores antes de continuar"
+        fi

@@ -1,0 +1,242 @@
+[tool.black]
+# Configuración para Black - Formateador de código Python
+
+# Longitud máxima de línea
+line-length = 88
+
+# Versión objetivo de Python
+target-version = ['py311']
+
+# Archivos a incluir
+include = '\.pyi?$'
+
+# Archivos y directorios a excluir
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | venv
+  | env
+)/
+'''
+
+# Forzar parentesis en comprensiones/generadores largos
+force-exclude = '''
+/(
+  migrations
+  | \.venv
+  | venv
+)/
+'''
+
+# Configuraciones adicionales
+skip-string-normalization = false
+skip-magic-trailing-comma = false
+experimental-string-processing = false
+
+[tool.isort]
+# Configuración para isort - Ordenamiento de imports
+
+# Perfil compatible con black
+profile = "black"
+
+# Longitud de línea
+line_length = 88
+
+# Configuración multi-línea
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+# Directorios conocidos
+known_first_party = ["calculadora_python"]
+known_third_party = ["pytest", "numpy", "pandas"]
+
+# Secciones de imports
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+# Archivos a saltear
+skip_glob = ["*/migrations/*", "venv/*", ".venv/*"]
+
+[tool.mypy]
+# Configuración para MyPy - Verificación de tipos
+
+# Versión de Python
+python_version = "3.11"
+
+# Strictness
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+
+# Error handling
+show_error_codes = true
+show_error_context = true
+pretty = true
+
+# Import discovery
+namespace_packages = true
+explicit_package_bases = true
+
+# Directories to check
+files = ["calculadora_python.py", "test_*.py"]
+
+# Directories to ignore
+exclude = [
+    "venv/",
+    ".venv/",
+    "build/",
+    "dist/",
+]
+
+# Per-module options
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+[tool.pytest.ini_options]
+# Configuración para pytest
+
+# Directorios de tests
+testpaths = [
+    ".",
+]
+
+# Patrones de archivos de test
+python_files = [
+    "test_*.py",
+    "*_test.py",
+]
+
+# Patrones de funciones de test
+python_functions = [
+    "test_*",
+]
+
+# Patrones de clases de test
+python_classes = [
+    "Test*",
+]
+
+# Marcadores personalizados
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "regression: marks tests as regression tests",
+    "smoke: marks tests as smoke tests",
+]
+
+# Opciones adicionales
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--tb=short",
+    "--disable-warnings",
+]
+
+# Filtros de warnings
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+# Configuración de cobertura
+# (requiere pytest-cov)
+# addopts = "--cov=calculadora_python --cov-report=html --cov-report=term"
+
+[tool.coverage.run]
+# Configuración para coverage.py
+
+# Archivos a incluir en cobertura
+source = ["calculadora_python"]
+
+# Archivos/patrones a excluir
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "setup.py",
+]
+
+# Incluir branches en reporte
+branch = true
+
+[tool.coverage.report]
+# Configuración de reportes de cobertura
+
+# Precisión decimal
+precision = 2
+
+# Mostrar líneas faltantes
+show_missing = true
+
+# Saltear archivos vacíos
+skip_empty = true
+
+# Saltear archivos cubiertos al 100%
+skip_covered = false
+
+# Ordenar por cobertura
+sort = "Cover"
+
+# Excluir líneas que contengan estos patrones
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+# Configuración para reporte HTML
+directory = "htmlcov"
+
+[tool.bandit]
+# Configuración para bandit - Análisis de seguridad
+
+# Niveles de confianza a reportar
+confidence = ["HIGH", "MEDIUM"]
+
+# Severidad mínima a reportar  
+severity = ["MEDIUM", "HIGH"]
+
+# Tests a excluir
+exclude_dirs = [
+    "/tests",
+    "/test",
+    "/.venv",
+    "/venv",
+]
+
+# Tests específicos a saltear
+skips = [
+    "B101",  # Test for use of assert
+]
+
+# Formato de salida
+format = "json"

@@ -1,0 +1,73 @@
+[flake8]
+# Configuración para flake8 - Análisis estático de Python
+
+# Longitud máxima de línea (compatible con black)
+max-line-length = 88
+
+# Complejidad ciclomática máxima
+max-complexity = 10
+
+# Archivos y directorios a ignorar
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    env,
+    venv,
+    ENV,
+    env.bak,
+    venv.bak,
+    build,
+    dist,
+    *.egg-info,
+    .pytest_cache,
+    .coverage,
+    htmlcov
+
+# Errores y warnings específicos a ignorar
+ignore = 
+    # E203: whitespace before ':' (conflicto con black)
+    E203,
+    # E501: line too long (manejado por black)
+    E501,
+    # W503: line break before binary operator (preferencia actual de PEP 8)
+    W503
+
+# Errores que nunca se deben ignorar
+select = 
+    # Errores de sintaxis
+    E9,
+    # Imports problemáticos
+    F63,F7,F82,
+    # Variables indefinidas
+    F821,
+    # Imports no utilizados
+    F401,
+    # Variables no utilizadas
+    F841
+
+# Habilitar extensiones adicionales
+enable-extensions = 
+    # flake8-bugbear (mejores prácticas)
+    B,
+    # flake8-comprehensions (comprensiones más eficientes)
+    C4
+
+# Configuración por tipo de archivo
+per-file-ignores =
+    # Tests pueden tener imports no utilizados y líneas largas
+    test_*.py:F401,E501
+    # __init__.py puede tener imports no utilizados
+    __init__.py:F401
+
+# Mostrar estadísticas
+statistics = True
+
+# Mostrar código fuente del error
+show-source = True
+
+# Mostrar conteo de errores
+count = True
+
+# Formato de salida
+format = %(path)s:%(row)d:%(col)d: %(code)s %(text)s

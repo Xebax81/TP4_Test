@@ -1,0 +1,80 @@
+name: Deploy to Development - Post Merge
+
+# Ejecutar cuando se hace merge a develop (opcional)
+on:
+  push:
+    branches: [ develop ]
+
+env:
+  PYTHON_VERSION: 3.11
+  NODE_VERSION: 18
+
+jobs:
+  build-and-deploy:
+    name: "🚀 Build React App y Deploy a Firebase"
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Configurar Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: 'web/package-lock.json'
+
+    - name: Validación rápida Python
+      run: |
+        python -c "from calculadora_python import Calculadora; print('✅ Python Backend OK')"
+
+    - name: Instalar dependencias React
+      run: |
+        cd web
+        npm ci
+
+    - name: Ejecutar tests React
+      run: |
+        cd web
+        npm test -- --coverage --watchAll=false
+
+    - name: Build aplicación React
+      run: |
+        cd web
+        npm run build
+
+    - name: Verificar build
+      run: |
+        echo "� Verificando build de React..."
+        ls -la web/build/
+        echo "✅ Build generado correctamente"
+
+    - name: Deploy a Firebase Hosting
+      uses: FirebaseExtended/action-hosting-deploy@v0
+      with:
+        repoToken: '${{ secrets.GITHUB_TOKEN }}'
+        firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CALCULADORA_TP7 }}'
+        projectId: calculadora-tp7
+        channelId: development
+      env:
+        FIREBASE_CLI_EXPERIMENTS: webframeworks
+
+    - name: Notificar equipo del deploy exitoso
+      run: |
+        echo "🎉 DEPLOY EXITOSO A FIREBASE HOSTING"
+        echo "=================================="
+        echo "📦 Branch: ${{ github.ref_name }}"
+        echo "📝 Commit: ${{ github.sha }}"
+        echo "👤 Author: ${{ github.actor }}"
+        echo "🔗 URL Development: https://calculadora-tp7--development.web.app"
+        echo "📅 Fecha: $(date)"
+        echo ""
+        echo "✅ Aplicación React desplegada correctamente"
+        echo "✅ Backend Python validado"
+        echo "✅ Pipeline CI/CD completado"
